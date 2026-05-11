@@ -1,57 +1,104 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 int main() {
-    char linha[10] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'}; //Letras para as colunas
-    int coluna[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}; //Numero para as linhas
-    //Criando o Tabuleiro
-    int tabuleiro [10][10]; //Matriz para o tabuleiro
-    for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10; j++) {
-            tabuleiro[i][j] = 0; //Inicializa o tabuleiro com 0
+    char linha[10] = {'A','B','C','D','E','F','G','H','I','J'};
+    int coluna[10] = {1,2,3,4,5,6,7,8,9,10};
+    char tabuleiro[10][10];
+
+    // Inicializa tabuleiro com água
+    for(int i=0;i<10;i++){
+        for(int j=0;j<10;j++){
+            tabuleiro[i][j] = '~';
         }
-    }
-    //Navio na horizontal na linha 2, coluna 1 (aqui são os valores da matriz, não do tabuleiro)
-    for(int j = 1; j<=3; j++) {
-        tabuleiro[2][j] = 3;
-    }
-    //Navio na vertical na linha 5, coluna 4 (aqui são os valores da matriz, não do tabuleiro)
-    for(int i = 5; i<=7; i++) {
-        tabuleiro[i][4] = 3;
     }
 
-    //Navio na diagonal principal (aqui a linha aumenta e a coluna também aumenta)
-    int diagonal1_linha = 0, diagonal1_coluna = 6; //marca a posição inicial
-    for(int i = 0; i <3; i++) {
-        int l = diagonal1_linha + i; //Calcula a linha atual
-        int c = diagonal1_coluna + i; //Calcula a coluna atual
-        if (l < 10 && c < 10 && tabuleiro[l][c] == 0) { //Limite do tabuleiro
-            tabuleiro[l][c] = 3; //Coloca o navio na posição
-        }
-    }
-    //Navio na diagonal secundária (linha aumenta, coluna vai diminuir)
-    int diagonal2_linha = 5, diagonal2_coluna = 9; //marca a posição inicial
-    for(int i = 0; i <3; i++) {
-        int l = diagonal2_linha + i; //Calcula a linha atual
-        int c = diagonal2_coluna - i; //Calcula a coluna atual
-        if (l < 10 && c >= 0 && tabuleiro[l][c] == 0) { //Limite do tabuleiro
-            tabuleiro[l][c] = 3; //Coloca o navio na posição
-        }
-    }
-    printf(" Tabuleiro Batalha Naval\n");
-    printf ("  ");
-    for (int j = 0; j <10; j++) {
-        printf("%c ", linha[j]); //Mostra as colunas
-    }
-    printf("\n");
-    for(int i = 0; i < 10; i++) {
-        printf("%d ", coluna[i]); //Mostra as linhas
-        for (int j = 0; j < 10; j++) {
-            if (tabuleiro[i][j] == 0) {
-                printf("0 "); //Representa a água
-            } else if (tabuleiro[i][j] == 3) {
-                printf("3 "); //Representa o navio
+    //Navios nas horizontais e verticais
+    tabuleiro[1][2] = 'N';
+    tabuleiro[1][3] = 'N';
+    tabuleiro[1][4] = 'N';
+
+    tabuleiro[5][5] = 'N';
+    tabuleiro[6][5] = 'N';
+    tabuleiro[7][5] = 'N';
+
+    //Navios diagonais
+    //Diagonal principal (linha+1, coluna+1)
+    tabuleiro[2][6] = 'N';
+    tabuleiro[3][7] = 'N';
+    tabuleiro[4][8] = 'N';
+
+    //Diagonal secundária (linha+1, coluna-1)
+    tabuleiro[5][9] = 'N';
+    tabuleiro[6][8] = 'N';
+    tabuleiro[7][7] = 'N';
+
+    //MATRIZES DE HABILIDADES 5x5
+    int tamanho = 5;
+    int cone[5][5] = {0};
+    int cruz[5][5] = {0};
+    int octaedro[5][5] = {0};
+
+    //Cone
+    cone[0][2] = 1;
+    cone[1][1] = cone[1][2] = cone[1][3] = 1;
+    cone[2][0] = cone[2][1] = cone[2][2] = cone[2][3] = cone[2][4] = 1;
+
+    //Cruz
+    cruz[0][2] = 1;
+    cruz[1][0] = cruz[1][1] = cruz[1][2] = cruz[1][3] = cruz[1][4] = 1;
+    cruz[2][2] = 1;
+
+    //Octaedro
+    octaedro[0][2] = 1;
+    octaedro[1][1] = octaedro[1][2] = octaedro[1][3] = 1;
+    octaedro[2][2] = 1;
+
+    //SOBREPOSIÇÃO DAS HABILIDADES
+    int origem_cone_l = 0, origem_cone_c = 7;
+    int origem_cruz_l = 4, origem_cruz_c = 2;
+    int origem_octa_l = 6, origem_octa_c = 7;
+
+    for(int i=0;i<tamanho;i++){
+        for(int j=0;j<tamanho;j++){
+            int l, c;
+
+            //Cone
+            l = origem_cone_l + i;
+            c = origem_cone_c - 2 + j;
+            if(l>=0 && l<10 && c>=0 && c<10 && cone[i][j]==1){
+                if(tabuleiro[l][c]=='~') tabuleiro[l][c]='h';
             }
+
+            //Cruz
+            l = origem_cruz_l + i;
+            c = origem_cruz_c - 2 + j;
+            if(l>=0 && l<10 && c>=0 && c<10 && cruz[i][j]==1){
+                if(tabuleiro[l][c]=='~') tabuleiro[l][c]='h';
+            }
+
+            //Octaedro
+            l = origem_octa_l - 2 + i;
+            c = origem_octa_c - 2 + j;
+            if(l>=0 && l<10 && c>=0 && c<10 && octaedro[i][j]==1){
+                if(tabuleiro[l][c]=='~') tabuleiro[l][c]='h';
+            }
+        }
+    }
+
+    //EXIBIÇÃO DO TABULEIRO
+    printf("***Tabuleiro Batalha Naval***\n");
+    printf("  ");
+    for(int j=0;j<10;j++) printf("%c ", linha[j]);
+    printf("\n");
+
+    for(int i=0;i<10;i++){
+        printf("%d ", coluna[i]);
+        for(int j=0;j<10;j++){
+            printf("%c ", tabuleiro[i][j]);
         }
         printf("\n");
     }
+
     return 0;
 }
